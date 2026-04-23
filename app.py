@@ -21,7 +21,7 @@ HOST = os.getenv("host")
 PORT = os.getenv("port")
 DBNAME = os.getenv("dbname")
 # Construct the SQLAlchemy connection string
-DATABASE_URL = "postgresql+psycopg2://postgres:lAP4U4KlmoE5rLvw@db.xwsxtywrebwgtwgebuyp.supabase.co:5432/postgres?sslmode=require"
+DATABASE_URL =f"postgresql+psycopg2://postgres.xwsxtywrebwgtwgebuyp:lAP4U4KlmoE5rLvw@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
 engine = create_engine(DATABASE_URL)
 # ---------------- UI ---------------- #
 st.title("Hitesh Agro Foods")
