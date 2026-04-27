@@ -125,42 +125,43 @@ elif menu == "Raw Material":
     size = st.text_input("Size")
     qty = st.number_input("Quantity", min_value=0.0)
 
+    # ✅ define outside button (fixes your error)
+    item_clean = item.strip().lower()
+    size_clean = size.strip().lower()
+
     if st.button("Add Raw Material", key="add_raw"):
 
-     item_clean = item.strip().lower()
-     size_clean = size.strip().lower()
+        df_existing = pd.read_sql("SELECT * FROM raw_material", engine)
 
-    df_existing = pd.read_sql("SELECT * FROM raw_material", engine)
+        found = False
 
-    found = False
+        for _, r in df_existing.iterrows():
+            db_item = str(r["item"]).strip().lower()
+            db_size = str(r["size"]).strip().lower()
 
-    for _, r in df_existing.iterrows():
-        db_item = str(r["item"]).strip().lower()
-        db_size = str(r["size"]).strip().lower()
+            if db_item == item_clean and db_size == size_clean:
+                # ✅ UPDATE EXISTING ROW
+                new_qty = float(r["qty"]) + float(qty)
 
-        if db_item == item_clean and db_size == size_clean:
-            # ✅ UPDATE EXISTING ROW
-            new_qty = float(r["qty"]) + float(qty)
+                with engine.begin() as conn:
+                    conn.exec_driver_sql(
+                        "UPDATE raw_material SET qty=%s WHERE id=%s",
+                        (new_qty, int(r["id"]))
+                    )
 
-            with engine.begin() as conn:
-                conn.exec_driver_sql(
-                    "UPDATE raw_material SET qty=%s WHERE id=%s",
-                    (new_qty, int(r["id"]))
-                )
+                found = True
+                break
 
-            found = True
-            break
+        if not found:
+            # ✅ INSERT NEW ROW
+            df_add = pd.DataFrame(
+                [[item_clean, size_clean, float(qty), datetime.now()]],
+                columns=["item", "size", "qty", "date"]
+            )
+            df_add.to_sql("raw_material", engine, if_exists="append", index=False)
 
-    if not found:
-        # ✅ INSERT NEW ROW
-        df_add = pd.DataFrame(
-            [[item_clean, size_clean, float(qty), datetime.now()]],
-            columns=["item", "size", "qty", "date"]
-        )
-        df_add.to_sql("raw_material", engine, if_exists="append", index=False)
-
-    st.success("Added Successfully ✅")
-    st.rerun()
+        st.success("Raw material updated ✅")
+        st.rerun()
 
     # ---------------- SHOW DATA ---------------- #
     st.divider()
@@ -195,7 +196,7 @@ elif menu == "Raw Material":
 
         use_qty = st.number_input("Quantity to Use", min_value=0.1)
 
-        if st.button("Use Raw Material"):
+        if st.button("Use Raw Material", key="use_raw"):
             if available_qty >= use_qty:
 
                 new_qty = available_qty - use_qty
@@ -222,7 +223,7 @@ elif menu == "Raw Material":
 
         confirm_delete = st.checkbox("Confirm deletion")
 
-        if st.button("Delete Raw Material"):
+        if st.button("Delete Raw Material", key="delete_raw"):
             if confirm_delete:
                 with engine.begin() as conn:
                     conn.exec_driver_sql(
