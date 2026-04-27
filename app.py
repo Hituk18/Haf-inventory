@@ -127,8 +127,8 @@ elif menu == "Raw Material":
 
     if st.button("Add Raw Material", key="add_raw"):
 
-    item_clean = item.strip().lower()
-    size_clean = size.strip().lower()
+     item_clean = item.strip().lower()
+     size_clean = size.strip().lower()
 
     df_existing = pd.read_sql("SELECT * FROM raw_material", engine)
 
@@ -161,8 +161,8 @@ elif menu == "Raw Material":
 
     st.success("Raw material updated ✅")
     st.rerun()
-        st.success("Added Successfully ✅")
-        st.rerun()
+    st.success("Added Successfully ✅")
+    st.rerun()
 
     # ---------------- SHOW DATA ---------------- #
     st.divider()
