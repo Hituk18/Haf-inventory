@@ -159,8 +159,6 @@ elif menu == "Raw Material":
         )
         df_add.to_sql("raw_material", engine, if_exists="append", index=False)
 
-    st.success("Raw material updated ✅")
-    st.rerun()
     st.success("Added Successfully ✅")
     st.rerun()
 
