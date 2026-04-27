@@ -125,13 +125,42 @@ elif menu == "Raw Material":
     size = st.text_input("Size")
     qty = st.number_input("Quantity", min_value=0.0)
 
-    if st.button("Add Raw Material"):
+    if st.button("Add Raw Material", key="add_raw"):
+
+    item_clean = item.strip().lower()
+    size_clean = size.strip().lower()
+
+    df_existing = pd.read_sql("SELECT * FROM raw_material", engine)
+
+    found = False
+
+    for _, r in df_existing.iterrows():
+        db_item = str(r["item"]).strip().lower()
+        db_size = str(r["size"]).strip().lower()
+
+        if db_item == item_clean and db_size == size_clean:
+            # ✅ UPDATE EXISTING ROW
+            new_qty = float(r["qty"]) + float(qty)
+
+            with engine.begin() as conn:
+                conn.exec_driver_sql(
+                    "UPDATE raw_material SET qty=%s WHERE id=%s",
+                    (new_qty, int(r["id"]))
+                )
+
+            found = True
+            break
+
+    if not found:
+        # ✅ INSERT NEW ROW
         df_add = pd.DataFrame(
-            [[item, size, float(qty), datetime.now()]],
+            [[item_clean, size_clean, float(qty), datetime.now()]],
             columns=["item", "size", "qty", "date"]
         )
         df_add.to_sql("raw_material", engine, if_exists="append", index=False)
 
+    st.success("Raw material updated ✅")
+    st.rerun()
         st.success("Added Successfully ✅")
         st.rerun()
 
